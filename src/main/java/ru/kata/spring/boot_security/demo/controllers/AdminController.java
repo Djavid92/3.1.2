@@ -19,17 +19,14 @@ import java.util.Set;
 public class AdminController {
 
     private final UserService userService;
-    private final RoleService roleService;
 
-    public AdminController(UserService userService, RoleService roleService) {
+    public AdminController(UserService userService) {
         this.userService = userService;
-        this.roleService = roleService;
     }
 
     @GetMapping
     public String getUserHomePage(@AuthenticationPrincipal User user, Model model) {
-        User userToShow = userService.findByUsername(user.getUsername());
-        model.addAttribute("user", userToShow);
+        model.addAttribute("user", userService.findByUsername(user.getUsername()));
         return "admin/adminHome";
     }
 
@@ -41,8 +38,7 @@ public class AdminController {
 
     @GetMapping("/add")
     public String showNewUserForm(Model model) {
-        User user = new User();
-        model.addAttribute("user", user);
+        model.addAttribute("user", new User());
         return "admin/addUser";
     }
 
@@ -61,39 +57,17 @@ public class AdminController {
     }
 
     @PostMapping("/add")
-    public String saveUser(@ModelAttribute("user") User user,
-                           @RequestParam(name = "role", required = false) String roleInput)
-    {
-        Role role = new Role(roleInput);
-        roleService.saveRole(role);
-
-        if (userService.findByUsername(user.getUsername()) == null) {
-            Set<Role> userRoles = new HashSet<>();
-            userRoles.add(role);
-            User userToSave = new User(
-                    user.getUsername(), user.getPassword(),
-                    user.getName(),user.getLastname(), user.getCity(),
-                    user.getAge(), user.getEmail(), userRoles);
-            userService.saveUser(userToSave);
-        }
-
+    public String saveUser(@ModelAttribute("userToAdd") User user,
+                           @RequestParam("role") String[] roleNames) {
+        userService.saveUser(user, roleNames);
         return "redirect:/admin/allUsers";
     }
 
     @PostMapping("/{id}/edit")
     public String updateSelectedUser(@ModelAttribute("user") User user,
-                                     @RequestParam(name = "role", required = false)
-                                     String roleInput)
+                                     @RequestParam("role") String[] roleNames)
     {
-        Logger log = LogManager.getLogger(AdminController.class);
-        log.info("Попытка обновления роли пользователя на " + roleInput);
-
-        Role role = new Role(roleInput);
-        roleService.saveRole(role);
-        Set<Role> userRoles = new HashSet<>();
-        userRoles.add(role);
-        user.setRoles(userRoles);
-        userService.updateUser(user);
+        userService.updateUser(user, roleNames);
         return "redirect:/admin/allUsers";
     }
 }

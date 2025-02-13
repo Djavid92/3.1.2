@@ -28,7 +28,16 @@
                 <input class="inputData" type="text" th:field="*{password}" id="password" placeholder="Enter password">
             </td>
             <td>
-                <input class="inputData" type="text" name="role" id="role" placeholder="Enter role">
+                <div class="inputs">
+                    <div class="input">
+                        <input class="checkbox" type="checkbox" value="USER" name="role">
+                        <label>USER</label>
+                    </div>
+                    <div class="input">
+                        <input class="checkbox" type="checkbox" value="ADMIN" name="role">
+                        <label>ADMIN</label>
+                    </div>
+                </div>
             </td>
             <td>
                 <input class="inputData" type="text" th:field="*{name}" id="name" placeholder="Enter name">
@@ -51,30 +60,6 @@
     <span id="spanRole" style="width: 100%; text-align: center; position: absolute; bottom: 20%; left: 0;"></span>
 </form>
 </body>
-
-<script>
-
-    const role = document.getElementById('role');
-    const spanRole = document.getElementById('spanRole');
-    const addUserButton = document.getElementById('addUser');
-    addUserButton.disabled = true;
-    
-    role.addEventListener('input', function () {
-        let userRole = 'ROLE_USER';
-        let adminRole = 'ROLE_ADMIN';
-        const inputValue = role.value.trim(); // Удаляем лишние пробелы
-        
-        if (inputValue === userRole || inputValue === adminRole) {  spanRole.style.display = 'none'; // Скрываем сообщение об ошибке
-            addUserButton.disabled = false; // Активируем кнопку
-        } else {
-            spanRole.textContent = 'Неверная роль: ' + inputValue; spanRole.style.display = 'block'; // Показываем сообщение об ошибке
-            spanRole.style.color = '#981926';
-            addUserButton.disabled = true; // Блокируем кнопку
-        }
-    }); 
-
-
-</script>
 
 <style>
     * {
@@ -152,6 +137,19 @@
         font-size: 12px;
         font-weight: 500;
         cursor: pointer;
+    }
+
+    .inputs {
+        width: 100%;
+    }
+    
+    .input {
+        width: 100%;
+        text-align: left;
+    }
+
+    .checkbox {
+        margin-right: 5px;
     }
 </style>
 

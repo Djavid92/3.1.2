@@ -29,7 +29,16 @@
                 <input class="userData" name="password" type="text" placeholder="password">
             </td>
             <td>
-                <input class="userData" name="role" type="text" placeholder="role">
+                <div class="inputs">
+                    <div class="input">
+                        <input class="checkbox" type="checkbox" value="USER" name="role">
+                        <label>USER</label>
+                    </div>
+                    <div class="input">
+                        <input class="checkbox" type="checkbox" value="ADMIN" name="role">
+                        <label>ADMIN</label>
+                    </div>
+                </div>
             </td>
             <td>
                 <input class="userData" name="name" type="text" th:field="*{name}" th:value="${user.name}" placeholder="name">
