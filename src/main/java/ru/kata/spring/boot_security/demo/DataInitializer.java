@@ -26,11 +26,17 @@ public class DataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        Role userRole = new Role("ROLE_USER");
-        Role adminRole = new Role("ROLE_ADMIN");
+        Role userRole = roleService.findByRoleName("ROLE_USER").orElseGet(() -> {
+            Role newUserRole = new Role("ROLE_USER");
+            roleService.saveRole(newUserRole);
+            return newUserRole;
+        });
 
-        roleService.saveRole(userRole);
-        roleService.saveRole(adminRole);
+        Role adminRole = roleService.findByRoleName("ROLE_ADMIN").orElseGet(() -> {
+            Role newAdminRole = new Role("ROLE_ADMIN");
+            roleService.saveRole(newAdminRole);
+            return newAdminRole;
+        });
 
         if (userService.findByUsername("user") == null) {
             Set<Role> userRoles = new HashSet<>();

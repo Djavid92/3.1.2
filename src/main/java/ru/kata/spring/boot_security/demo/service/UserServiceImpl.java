@@ -30,19 +30,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
@@ -56,17 +56,23 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void saveUser(User user, String[] roles) {
-
         if (userRepository.findByEmail(user.getEmail()) == null) {
-            Set<Role> rolestoSet = new HashSet<>();
+            Set<Role> rolesToSet = new HashSet<>();
 
             for (String role : roles) {
-                Role newRole = new Role("ROLE_" +role);
-                roleService.saveRole(newRole);
-                rolestoSet.add(newRole);
+                Role existingRole = roleService.findByRoleName("ROLE_" + role)
+                        .orElse(null);
+
+                if (existingRole != null) {
+                    rolesToSet.add(existingRole);
+                } else {
+                    Role newRole = new Role("ROLE_" + role);
+                    roleService.saveRole(newRole);
+                    rolesToSet.add(newRole);
+                }
             }
 
-            user.setRoles(rolestoSet);
+            user.setRoles(rolesToSet);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             userRepository.save(user);
@@ -74,22 +80,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public void updateUser(User user, String[] roles) {
-        Set<Role> rolestoSet = new HashSet<>();
+        Set<Role> rolesToSet = new HashSet<>();
 
         for (String role : roles) {
-            Role newRole = new Role("ROLE_" +role);
-            roleService.saveRole(newRole);
-            rolestoSet.add(newRole);
+            Role existingRole = roleService.findByRoleName("ROLE_" + role)
+                    .orElse(null);
+
+            if (existingRole != null) {
+                rolesToSet.add(existingRole);
+            } else {
+                Role newRole = new Role("ROLE_" + role);
+                roleService.saveRole(newRole);
+                rolesToSet.add(newRole);
+            }
         }
 
-        user.setRoles(rolestoSet);
+        user.setRoles(rolesToSet);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         userRepository.save(user);
     }
 }
