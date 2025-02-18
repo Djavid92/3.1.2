@@ -54,58 +54,62 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void saveUser(User user, String[] roles) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
-            Set<Role> rolesToSet = new HashSet<>();
+            Set<Role> userRoles = new HashSet<>();
 
             for (String role : roles) {
                 Role existingRole = roleService.findByRoleName("ROLE_" + role)
                         .orElse(null);
 
                 if (existingRole != null) {
-                    rolesToSet.add(existingRole);
+                    userRoles.add(existingRole);
                 } else {
                     Role newRole = new Role("ROLE_" + role);
-                    roleService.saveRole(newRole);
-                    rolesToSet.add(newRole);
+                    userRoles.add(newRole);
                 }
             }
 
-            user.setRoles(rolesToSet);
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-            userRepository.save(user);
+            userRepository.save(new User(
+                    user.getUsername(), passwordEncoder.encode(user.getPassword()),
+                    user.getName(), user.getLastname(),
+                    user.getCity(), 21, user.getEmail(),
+                    userRoles
+            ));
         }
     }
 
     @Override
-    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
-    @Transactional
     public void updateUser(User user, String[] roles) {
-        Set<Role> rolesToSet = new HashSet<>();
+
+        Set<Role> userRoles = new HashSet<>();
 
         for (String role : roles) {
             Role existingRole = roleService.findByRoleName("ROLE_" + role)
                     .orElse(null);
 
             if (existingRole != null) {
-                rolesToSet.add(existingRole);
+                userRoles.add(existingRole);
             } else {
                 Role newRole = new Role("ROLE_" + role);
-                roleService.saveRole(newRole);
-                rolesToSet.add(newRole);
+                userRoles.add(newRole);
             }
         }
 
-        user.setRoles(rolesToSet);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User userToSave = new User(
+                user.getUsername(), passwordEncoder.encode(user.getPassword()),
+                user.getName(), user.getLastname(),
+                user.getCity(), user.getAge(), user.getEmail(),
+                userRoles
+        );
 
-        userRepository.save(user);
+        userToSave.setId(user.getId());
+
+        userRepository.save(userToSave);
     }
 }
