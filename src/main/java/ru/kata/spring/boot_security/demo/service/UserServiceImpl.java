@@ -19,14 +19,16 @@ public class UserServiceImpl implements UserService {
     private final UserDao userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final Convertor convertor;
 
     @Autowired
     public UserServiceImpl(UserDao userRepository, PasswordEncoder passwordEncoder,
-                           RoleService roleService)
+                           RoleService roleService, Convertor convertor)
     {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
+        this.convertor = convertor;
     }
 
     @Override
@@ -56,25 +58,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveUser(User user, String[] roles) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
-            Set<Role> userRoles = new HashSet<>();
-
-            for (String role : roles) {
-                Role existingRole = roleService.findByRoleName("ROLE_" + role)
-                        .orElse(null);
-
-                if (existingRole != null) {
-                    userRoles.add(existingRole);
-                } else {
-                    Role newRole = new Role("ROLE_" + role);
-                    userRoles.add(newRole);
-                }
-            }
-
             userRepository.save(new User(
                     user.getUsername(), passwordEncoder.encode(user.getPassword()),
                     user.getName(), user.getLastname(),
                     user.getCity(), 21, user.getEmail(),
-                    userRoles
+                    convertor.stringToSet(roles)
             ));
         }
     }
@@ -86,26 +74,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(User user, String[] roles) {
-
-        Set<Role> userRoles = new HashSet<>();
-
-        for (String role : roles) {
-            Role existingRole = roleService.findByRoleName("ROLE_" + role)
-                    .orElse(null);
-
-            if (existingRole != null) {
-                userRoles.add(existingRole);
-            } else {
-                Role newRole = new Role("ROLE_" + role);
-                userRoles.add(newRole);
-            }
-        }
-
         User userToSave = new User(
                 user.getUsername(), passwordEncoder.encode(user.getPassword()),
                 user.getName(), user.getLastname(),
                 user.getCity(), user.getAge(), user.getEmail(),
-                userRoles
+                convertor.stringToSet(roles)
         );
 
         userToSave.setId(user.getId());
