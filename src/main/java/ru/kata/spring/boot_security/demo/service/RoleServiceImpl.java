@@ -27,11 +27,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Role> findByRoleName(String roleName) {
         return roleDao.findByRoleName(roleName);
     }
 
     @Override
+    @Transactional
     public void saveRole(Role role) {
         roleDao.save(role);
     }

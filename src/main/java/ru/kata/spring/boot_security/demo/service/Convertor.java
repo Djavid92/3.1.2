@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.models.Role;
 
 import java.util.HashSet;
@@ -15,6 +16,7 @@ public class Convertor {
         this.roleService = roleService;
     }
 
+    @Transactional(readOnly = true)
     public Set<Role> stringToSet(String[] roles) {
         Set<Role> userRoles = new HashSet<>();
 
