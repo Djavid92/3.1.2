@@ -55,13 +55,19 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Если говорить честно, то я вообще не понимаю как мне не назначать роли тут,
+     * ручками, поэтому сделал конвертор. Я понимаю, что вы хотите, чтобы я
+     * сразуполучал полного пользователя, но как???
+    */
+
     @Override
     public void saveUser(User user, String[] roles) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
             userRepository.save(new User(
                     user.getUsername(), passwordEncoder.encode(user.getPassword()),
                     user.getName(), user.getLastname(),
-                    user.getCity(), 21, user.getEmail(),
+                    user.getCity(), user.getAge(), user.getEmail(),
                     convertor.stringToSet(roles)
             ));
         }
