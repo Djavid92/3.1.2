@@ -1,6 +1,8 @@
 package ru.kata.spring.boot_security.demo.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Objects;
@@ -16,6 +18,7 @@ public class Role implements GrantedAuthority{
     private String roleName;
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<User> users;
 
     public Role(String roleName) {
