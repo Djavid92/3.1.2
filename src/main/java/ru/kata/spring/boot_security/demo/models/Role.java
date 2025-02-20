@@ -18,7 +18,6 @@ public class Role implements GrantedAuthority{
     private String roleName;
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<User> users;
 
     public Role(String roleName) {
