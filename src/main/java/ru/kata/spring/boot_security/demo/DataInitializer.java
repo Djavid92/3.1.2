@@ -5,6 +5,9 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
+import ru.kata.spring.boot_security.demo.dto.UserMapping;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
@@ -16,13 +19,16 @@ import java.util.Set;
 @Component
 public class DataInitializer implements ApplicationRunner {
 
+    private final UserMapping userMapping;
     private UserService userService;
     private RoleService roleService;
+    private UserDto userDto;
 
     @Autowired
-    public DataInitializer(UserService userService, RoleService roleService) {
+    public DataInitializer(UserService userService, RoleService roleService, UserMapping userMapping) {
         this.userService = userService;
         this.roleService = roleService;
+        this.userMapping = userMapping;
     }
 
     @Override
