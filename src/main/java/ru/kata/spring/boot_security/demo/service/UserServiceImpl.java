@@ -1,47 +1,45 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
+import ru.kata.spring.boot_security.demo.dto.UserMapping;
 import ru.kata.spring.boot_security.demo.models.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserDao userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Convertor convertor;
+    private final UserMapping userMapping;
 
-    @Autowired
-    public UserServiceImpl(UserDao userRepository, PasswordEncoder passwordEncoder,
-                           Convertor convertor)
-    {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.convertor = convertor;
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream().map(userMapping::toDto).collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public UserDto findByUsername(String username) {
+        return userMapping.toDto(userRepository.findByUsername(username));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<UserDto> getUserById(Long id) {
+        return userRepository.findById(id).stream().map(userMapping::toDto).findFirst();
     }
 
     @Override
@@ -53,12 +51,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void saveUser(User user, String[] roles) {
-        if (userRepository.findByEmail(user.getEmail()) == null) {
+    public void saveUser(UserDto userDto, String[] roles) {
+        if (userRepository.findByEmail(userDto.getEmail()) == null) {
             userRepository.save(new User(
-                    user.getUsername(), passwordEncoder.encode(user.getPassword()),
-                    user.getName(), user.getLastname(),
-                    user.getCity(), user.getAge(), user.getEmail(),
+                    userDto.getUsername(), passwordEncoder.encode(userDto.getPassword()),
+                    userDto.getName(), userDto.getLastname(),
+                    userDto.getCity(), userDto.getAge(), userDto.getEmail(),
                     convertor.stringToSet(roles)
             ));
         }
@@ -72,15 +70,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(User user, String[] roles) {
+    public void updateUser(UserDto userDto, String[] roles) {
         User userToSave = new User(
-                user.getUsername(), passwordEncoder.encode(user.getPassword()),
-                user.getName(), user.getLastname(),
-                user.getCity(), user.getAge(), user.getEmail(),
+                userDto.getUsername(), passwordEncoder.encode(userDto.getPassword()),
+                userDto.getName(), userDto.getLastname(),
+                userDto.getCity(), userDto.getAge(), userDto.getEmail(),
                 convertor.stringToSet(roles)
         );
 
-        userToSave.setId(user.getId());
+        userToSave.setId(userDto.getId());
 
         userRepository.save(userToSave);
     }

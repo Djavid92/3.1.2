@@ -4,6 +4,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
+import ru.kata.spring.boot_security.demo.dto.UserMapping;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
@@ -15,10 +17,12 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleService roleService;
+    private final UserMapping userMapping;
 
-    public AdminController(UserService userService, RoleService roleService) {
+    public AdminController(UserService userService, RoleService roleService, UserMapping userMapping) {
         this.userService = userService;
         this.roleService = roleService;
+        this.userMapping = userMapping;
     }
 
     @GetMapping
@@ -42,9 +46,9 @@ public class AdminController {
 
     @GetMapping("/{id}/edit")
     public String showEditUserForm(@PathVariable Long id, Model model) {
-        User user = userService.getUserById(id).orElse(null);
+        UserDto userDto = userService.getUserById(id).orElse(null);
 
-        model.addAttribute("user", user);
+        model.addAttribute("user", userDto);
         return "admin/editUser";
     }
 
@@ -55,18 +59,18 @@ public class AdminController {
     }
 
     @PostMapping("/add")
-    public String saveUser(@ModelAttribute("userToAdd") User user,
+    public String saveUser(@ModelAttribute("userToAdd") UserDto userDto,
                            @RequestParam("role") String[] roleNames)
     {
-        userService.saveUser(user, roleNames);
+        userService.saveUser(userDto, roleNames);
         return "redirect:/admin/allUsers";
     }
 
     @PostMapping("/{id}/edit")
-    public String updateSelectedUser(@ModelAttribute("user") User user,
+    public String updateSelectedUser(@ModelAttribute("user") UserDto userDto,
                                      @RequestParam("role") String[] roleNames)
     {
-        userService.updateUser(user, roleNames);
+        userService.updateUser(userDto, roleNames);
         return "redirect:/admin/allUsers";
     }
 }
